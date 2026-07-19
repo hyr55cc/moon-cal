@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d4f3c">
+  <meta name="description" content="moon - تقويم هجري وميلادي احترافي يعتمد على تقويم أم القرى مع نظام مواعيد وإشعارات">
+  <meta name="keywords" content="تقويم, هجري, ميلادي, أم القرى, تقويم إسلامي, مواعيد, تنبيهات, PWA">
+  <meta name="author" content="moon Calendar">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="moon">
+
+  <title>moon · تقويم هجري وميلادي</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <!-- Fonts: preconnect for performance, classic + UI -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700&family=Cormorant+Garamond:wght@500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <!-- ============================================ -->
+    <!-- HEADER                                       -->
+    <!-- ============================================ -->
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="brand">
+          <div class="brand-mark">🌙</div>
+          <div class="brand-text">
+            <div class="brand-name">moon</div>
+            <div class="brand-tag">تقويم أم القرى · المواعيد · الإشعارات</div>
+          </div>
+        </div>
+        <nav class="header-nav">
+          <button class="nav-btn active" data-view="calendar">
+            <span>📅</span> التقويم
+          </button>
+          <button class="nav-btn" data-view="converter">
+            <span>🔄</span> تحويل التاريخ
+          </button>
+          <button class="nav-btn" data-view="data">
+            <span>📥</span> استيراد / تصدير
+          </button>
+          <button class="nav-btn" data-view="settings">
+            <span>⚙️</span> الإعدادات
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- ============================================ -->
+    <!-- MAIN CONTENT                                 -->
+    <!-- ============================================ -->
+    <main class="app-main">
+
+      <!-- ============================================ -->
+      <!-- CALENDAR VIEW                               -->
+      <!-- ============================================ -->
+      <section id="calendarView" class="view active">
+        <div class="calendar-toolbar">
+          <div class="toolbar-section">
+            <button id="prevMonthBtn" class="toolbar-btn icon-only" title="الشهر السابق">
+              <span>→</span>
+            </button>
+            <div>
+              <div id="monthLabel" class="month-label">-</div>
+              <div id="subMonthLabel" class="sub-month-label">-</div>
+            </div>
+            <button id="nextMonthBtn" class="toolbar-btn icon-only" title="الشهر التالي">
+              <span>←</span>
+            </button>
+          </div>
+
+          <div class="toolbar-section">
+            <div class="calendar-system-toggle">
+              <button class="system-toggle-btn" data-sys="hijri">هجري</button>
+              <button class="system-toggle-btn" data-sys="gregorian">ميلادي</button>
+            </div>
+            <button id="todayBtn" class="toolbar-btn" title="اليوم">
+              <span>📍</span> اليوم
+            </button>
+            <button id="addEventBtn" class="toolbar-btn primary" title="إضافة موعد">
+              <span>➕</span> موعد جديد
+            </button>
+          </div>
+        </div>
+
+        <div class="calendar-container">
+          <div id="calendarGrid"></div>
+        </div>
+
+        <div class="events-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">📌</span>
+              المواعيد القادمة
+            </h2>
+          </div>
+          <div id="eventsList" class="events-list"></div>
+        </div>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- CONVERTER VIEW                              -->
+      <!-- ============================================ -->
+      <section id="converterView" class="view">
+        <div class="converter-card">
+          <div class="section-header" style="margin-bottom: 1rem; padding-bottom: 0.75rem;">
+            <h2 class="section-title">
+              <span class="section-title-icon">🔄</span>
+              محول التاريخ
+            </h2>
+          </div>
+
+          <div class="converter-tabs">
+            <button class="converter-tab active" data-dir="g2h">ميلادي ← هجري</button>
+            <button class="converter-tab" data-dir="h2g">هجري ← ميلادي</button>
+          </div>
+
+          <div id="gToHConverter">
+            <div class="form-group">
+              <label class="form-label">التاريخ الميلادي</label>
+              <input type="date" id="gDateInput" class="form-input">
+            </div>
+            <div id="gToHResult" class="converter-result">
+              <div class="converter-result-divider"></div>
+              <div class="converter-result-label">التاريخ الهجري المقابل</div>
+              <div class="converter-result-value">—</div>
+            </div>
+          </div>
+
+          <div id="hToGConverter" style="display: none;">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">السنة الهجرية</label>
+                <input type="number" id="hYearInput" class="form-input" min="1300" max="1600" value="1447">
+              </div>
+              <div class="form-group">
+                <label class="form-label">الشهر</label>
+                <select id="hMonthInput" class="form-select">
+                  <option value="1">محرم</option>
+                  <option value="2">صفر</option>
+                  <option value="3">ربيع الأول</option>
+                  <option value="4">ربيع الآخر</option>
+                  <option value="5">جمادى الأولى</option>
+                  <option value="6">جمادى الآخرة</option>
+                  <option value="7">رجب</option>
+                  <option value="8">شعبان</option>
+                  <option value="9">رمضان</option>
+                  <option value="10">شوال</option>
+                  <option value="11">ذو القعدة</option>
+                  <option value="12">ذو الحجة</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">اليوم</label>
+              <input type="number" id="hDayInput" class="form-input" min="1" max="30" value="1">
+            </div>
+            <div id="hToGResult" class="converter-result">
+              <div class="converter-result-divider"></div>
+              <div class="converter-result-label">التاريخ الميلادي المقابل</div>
+              <div class="converter-result-value">—</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 1.5rem; padding: 1rem; background: var(--ivory-2); border-radius: var(--radius-md); font-size: 0.85rem; color: var(--text-2); line-height: 1.6;">
+            <strong>💡 ملاحظة:</strong> يستخدم هذا التقويم خوارزمية <strong>أم القرى</strong> الرسمية المعتمدة في المملكة العربية السعودية، وهي الأكثر دقة للتاريخ الهجري.
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- IMPORT / EXPORT VIEW                        -->
+      <!-- ============================================ -->
+      <section id="dataView" class="view">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="section-title-icon">📥</span>
+            استيراد وتصدير المواعيد
+          </h2>
+        </div>
+
+        <div class="import-export-section">
+          <div class="ie-card">
+            <div class="ie-card-icon">📤</div>
+            <div class="ie-card-title">تصدير المواعيد</div>
+            <p class="ie-card-text">
+              صدّر جميع مواعيدك بصيغة <strong>iCalendar (.ics)</strong> المعتمدة عالمياً، ويمكن استيرادها في:
+              <br>• تقويم Google
+              <br>• تقويم Apple
+              <br>• Microsoft Outlook
+              <br>• أي تطبيق تقويم يدعم الصيغة القياسية
+            </p>
+            <div class="ie-card-actions">
+              <button id="exportICSBtn" class="btn btn-primary">
+                <span>📥</span> تصدير بصيغة ICS
+              </button>
+              <button id="exportJSONBtn" class="btn btn-secondary">
+                <span>💾</span> نسخة احتياطية JSON
+              </button>
+            </div>
+          </div>
+
+          <div class="ie-card">
+            <div class="ie-card-icon">📥</div>
+            <div class="ie-card-title">استيراد المواعيد</div>
+            <p class="ie-card-text">
+              استورد مواعيدك من <strong>Google Calendar</strong> أو <strong>Apple Calendar</strong> أو من ملف JSON محفوظ مسبقاً.
+              <br><br>
+              <strong>للاستيراد من Google Calendar:</strong>
+              <br>١. افتح Google Calendar على الكمبيوتر
+              <br>٢. الإعدادات ← تصدير التقويم ← اختر التقويم
+              <br>٣. سيتم تنزيل ملف ZIP يحوي ملف .ics
+              <br>٤. فك الضغط واختر ملف .ics
+            </p>
+            <div class="ie-card-actions">
+              <label class="btn btn-primary" style="cursor: pointer;">
+                <span>📂</span> استيراد ملف ICS
+                <input type="file" id="importICSFile" accept=".ics,text/calendar" style="display: none;">
+              </label>
+              <label class="btn btn-secondary" style="cursor: pointer;">
+                <span>📂</span> استيراد ملف JSON
+                <input type="file" id="importJSONFile" accept=".json,application/json" style="display: none;">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-card" style="margin-top: 1.5rem;">
+          <h3 style="font-family: var(--font-ar-display); color: var(--emerald-800); font-size: 1.15rem; margin-bottom: 0.875rem;">💡 نصائح للاستيراد من Google Calendar</h3>
+          <ol style="padding-right: 1.5rem; line-height: 1.8; color: var(--text-2); font-size: 0.9rem;">
+            <li>افتح <strong>calendar.google.com</strong> على الكمبيوتر</li>
+            <li>اضغط على أيقونة الترس (الإعدادات) في الأعلى</li>
+            <li>اختر <strong>إعدادات</strong> من القائمة الجانبية</li>
+            <li>اضغط على <strong>استيراد وتصدير</strong> من الشريط الجانبي</li>
+            <li>اضغط <strong>تصدير</strong> - سيتم تنزيل ملف ZIP</li>
+            <li>فك الضغط عن الملف واحصل على ملف <code>*.ics</code></li>
+            <li>ارجع إلى هنا واختر "استيراد ملف ICS"</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- SETTINGS VIEW                               -->
+      <!-- ============================================ -->
+      <section id="settingsView" class="view">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="section-title-icon">⚙️</span>
+            الإعدادات
+          </h2>
+        </div>
+
+        <div class="settings-card">
+          <h3 style="font-family: var(--font-ar-display); color: var(--emerald-800); font-size: 1.15rem; margin-bottom: 1rem;">الإشعارات</h3>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="setting-label">تفعيل الإشعارات</div>
+              <div class="setting-description">
+                احصل على تذكير قبل كل موعد. تتطلب هذه الميزة إذن من المتصفح.
+                <br><span id="notificationStatus" style="font-size: 0.8rem; font-weight: 600;"></span>
+              </div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="enableNotifications">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 style="font-family: var(--font-ar-display); color: var(--emerald-800); font-size: 1.15rem; margin-bottom: 1rem;">التقويم</h3>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="setting-label">التقويم الأساسي</div>
+              <div class="setting-description">التقويم الذي يظهر بشكل أساسي في الواجهة</div>
+            </div>
+            <div class="calendar-system-toggle">
+              <button class="system-toggle-btn" data-sys="hijri" onclick="document.querySelectorAll('.system-toggle-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');">هجري</button>
+              <button class="system-toggle-btn" data-sys="gregorian" onclick="document.querySelectorAll('.system-toggle-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');">ميلادي</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 style="font-family: var(--font-ar-display); color: var(--emerald-800); font-size: 1.15rem; margin-bottom: 1rem;">البيانات</h3>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="setting-label">حذف جميع المواعيد</div>
+              <div class="setting-description">احذف جميع المواعيد نهائياً. هذا الإجراء لا يمكن التراجع عنه.</div>
+            </div>
+            <button id="clearAllBtn" class="btn btn-danger">حذف الكل</button>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 style="font-family: var(--font-ar-display); color: var(--emerald-800); font-size: 1.15rem; margin-bottom: 0.5rem;">حول التطبيق</h3>
+          <div style="line-height: 1.8; color: var(--text-2); font-size: 0.9rem;">
+            <p><strong>moon</strong> · تقويم هجري وميلادي احترافي</p>
+            <p>الإصدار: 1.0.0</p>
+            <p>يستخدم تقويم <strong>أم القرى</strong> الرسمي المعتمد في المملكة العربية السعودية.</p>
+            <p>التطبيق يعمل بدون إنترنت (PWA) - ثبّته على جهازك للوصول السريع.</p>
+            <p style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-2); color: var(--text-3); font-size: 0.8rem;">
+              جميع بياناتك محفوظة محلياً في جهازك. لا يتم إرسال أي بيانات إلى خوادم خارجية.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ============================================ -->
+    <!-- FOOTER                                       -->
+    <!-- ============================================ -->
+    <footer class="app-footer">
+      <div class="app-footer-name">moon · تقويم</div>
+      <div>يعمل بتقويم أم القرى · تقويم هجري وميلادي احترافي</div>
+    </footer>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- TOAST CONTAINER                              -->
+  <!-- ============================================ -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ============================================ -->
+  <!-- MODALS                                       -->
+  <!-- ============================================ -->
+
+  <!-- Event Form Modal -->
+  <div class="modal-backdrop" id="eventModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="eventModalTitle" class="modal-title">إضافة موعد جديد</h2>
+        <button class="modal-close" aria-label="إغلاق">×</button>
+      </div>
+      <form id="eventForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label"><span class="required">*</span> عنوان الموعد</label>
+            <input type="text" name="eventTitle" class="form-input" required maxlength="100" placeholder="مثال: اجتماع العمل، ذكرى زواج...">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label"><span class="required">*</span> التاريخ الميلادي</label>
+              <input type="date" name="eventDate" id="eventDate" class="form-input" required>
+              <div id="eventDateHijri" class="form-hint">—</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">الوقت</label>
+              <input type="time" name="eventTime" class="form-input" value="09:00">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">المدة (دقيقة)</label>
+              <input type="number" name="eventDuration" class="form-input" min="0" max="1440" value="60">
+            </div>
+            <div class="form-group">
+              <label class="form-label">التصنيف</label>
+              <select name="eventCategory" id="eventCategory" class="form-select"></select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">التذكير قبل (دقيقة)</label>
+              <select name="eventReminder" class="form-select">
+                <option value="0">بدون تذكير</option>
+                <option value="5">قبل 5 دقائق</option>
+                <option value="15">قبل 15 دقيقة</option>
+                <option value="30" selected>قبل 30 دقيقة</option>
+                <option value="60">قبل ساعة</option>
+                <option value="120">قبل ساعتين</option>
+                <option value="1440">قبل يوم</option>
+                <option value="10080">قبل أسبوع</option>
+              </select>
+            </div>
+            <div class="form-group" style="display: flex; align-items: flex-end; padding-bottom: 0.5rem;">
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 500; color: var(--emerald-800);">
+                <input type="checkbox" name="eventAllDay" style="width: 18px; height: 18px; accent-color: var(--emerald-700);">
+                <span>موعد طوال اليوم</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">ملاحظات</label>
+            <textarea name="eventDescription" class="form-textarea" placeholder="أي تفاصيل إضافية..." maxlength="500"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="cancelEventBtn" class="btn btn-secondary">إلغاء</button>
+          <button type="button" id="deleteEventBtn" class="btn btn-danger" style="display: none; margin-right: auto;" onclick="document.getElementById('deleteEventFormBtn').click()">حذف</button>
+          <button type="submit" class="btn btn-primary">حفظ الموعد</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Hidden delete button for event edit -->
+  <button id="deleteEventFormBtn" style="display:none;" onclick=""></button>
+
+  <!-- Day Detail Modal -->
+  <div class="modal-backdrop" id="dayDetailModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <div id="dayDetailDayName" class="day-detail-day-name" style="color: var(--gold-300); font-size: 0.85rem; font-weight: 500;"></div>
+          <h2 id="dayDetailHijri" class="modal-title">-</h2>
+        </div>
+        <button class="modal-close" aria-label="إغلاق">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="dayDetailGregorian" class="day-detail-gregorian" style="margin-bottom: 1.25rem; font-size: 0.95rem; color: var(--text-3);">-</div>
+        <div id="dayDetailEventsList" class="day-detail-events-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-close">إغلاق</button>
+        <button id="addEventForDayBtn" class="btn btn-primary">
+          <span>➕</span> إضافة موعد لهذا اليوم
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- SCRIPTS                                      -->
+  <!-- ============================================ -->
+  <script src="js/hijri.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/ics.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
